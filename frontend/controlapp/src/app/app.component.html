@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Students & Subjects App</title>
+    <!-- Bootstrap -->
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="topTab">
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs" id="myTabs">
+        <li class="nav-item">
+          <a
+            class="nav-link active"
+            id="tab1-tab"
+            data-toggle="tab"
+            href="#tab1"
+            >Students</a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="tab2-tab" data-toggle="tab" href="#tab2"
+            >Subjects</a
+          >
+        </li>
+      </ul>
+
+      <!-- Tab panes -->
+      <div class="tab-content mt-2">
+        <!-- ############### Tab 1 #################-->
+        <div class="tab-pane fade show active" id="tab1">
+          <nav class="navbar navbar-expand-lg navbar-dark bg-white">
+            <a class="navbar-brand" style="color: black">Students Manager</a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-toggle="collapse"
+              data-target="#navbarColor02"
+              aria-controls="navbarColor02"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarColor02">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                  <a
+                    class="nav-link"
+                    (click)="onOpenStudentModal(null, 'add')"
+                    style="color: black"
+                    >Add Student <span class="sr-only">(current)</span></a
+                  >
+                </li>
+              </ul>
+              <form class="form-inline my-2 my-lg-0">
+                <input
+                  type="search"
+                  (ngModelChange)="searchStudents(key.value)"
+                  #key="ngModel"
+                  ngModel
+                  name="key"
+                  id="searchStudents"
+                  class="form-control mr-sm-2"
+                  placeholder="Search students..."
+                  required
+                />
+              </form>
+            </div>
+          </nav>
+          <div class="container" id="main-container">
+            <div class="row">
+              <div
+                *ngFor="let student of getPaginatedStudents()"
+                class="col-md-6 col-xl-4"
+              >
+                <div class="col-lg-12 col-md-12 col-xl-12 mt-3"></div>
+                <div class="card m-b-30">
+                  <div class="card-body row">
+                    <div class="col-12 card-title align-self-center mb-0">
+                      <h5>{{ student?.name }}</h5>
+                    </div>
+                  </div>
+                  <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                      <i class="fa fa-envelope float-right"></i>ID:
+                      {{ student?.id }}
+                    </li>
+                    <li class="list-group-item">
+                      <i class="fa fa-envelope float-right"></i>Email:
+                      {{ student?.email }}
+                    </li>
+                    <li class="list-group-item">
+                      <i class="fa fa-phone float-right"></i>Phone:
+                      {{ student?.phone }}
+                    </li>
+                    <li
+                      *ngFor="
+                        let studentSubject of getStudentSubjects(student.id)
+                      "
+                      class="list-group-item"
+                    >
+                      <i class="fa fa-phone float-right"></i>
+                      {{ getSubjectName(studentSubject.subjectId) }}
+                      <a
+                        (click)="
+                          onDeleteStudentSubject(
+                            student.id,
+                            studentSubject.subjectId
+                          )
+                        "
+                        class="btn btn-secondary tooltips"
+                        data-placement="top"
+                        data-original-title="Delete"
+                      >
+                        <i class="fa fa-times"></i>
+                      </a>
+                    </li>
+                  </ul>
+                  <div class="card-body">
+                    <div class="float-right btn-group btn-group-sm">
+                      <a
+                        (click)="onOpenStudentModal(student, 'edit')"
+                        class="btn btn-primary tooltips"
+                        data-placement="top"
+                        data-original-title="Edit"
+                        ><i class="fa fa-pencil"></i>
+                      </a>
+                      <a
+                        (click)="onOpenStudentModal(student, 'delete')"
+                        class="btn btn-secondary tooltips"
+                        data-placement="top"
+                        data-original-title="Delete"
+                        ><i class="fa fa-times"></i
+                      ></a>
+                      <a
+                        (click)="onOpenStudentModal(student, 'addSubject')"
+                        class="btn btn-success tooltips"
+                        data-placement="top"
+                        data-original-title="Add Subject"
+                        ><i class="fa fa-plus"></i> Add Subject</a
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-3">
+                <ul class="pagination">
+                  <li
+                    class="page-item"
+                    *ngFor="let page of getPaginationStudentsArray()"
+                  >
+                    <a class="page-link" (click)="onPageChangeStudent(page)">{{
+                      page
+                    }}</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Add Modal -->
+            <div
+              class="modal fade"
+              id="addStudentModal"
+              tabindex="-1"
+              role="dialog"
+              aria-labelledby="addStudentModalLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="addStudentModalLabel">
+                      Add Student
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form
+                      #addStudentForm="ngForm"
+                      (ngSubmit)="onAddStudent(addStudentForm)"
+                    >
+                      <div class="form-group">
+                        <label for="name">Name</label>
+                        <input
+                          type="text"
+                          ngModel
+                          name="name"
+                          class="form-control"
+                          id="name"
+                          placeholder="Name"
+                          required
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="email">Email</label>
+                        <input
+                          type="text"
+                          ngModel
+                          name="email"
+                          class="form-control"
+                          id="email"
+                          placeholder="Email"
+                          required
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input
+                          type="number"
+                          (input)="limitInputLength($event, 10)"
+                          ngModel
+                          name="phone"
+                          class="form-control"
+                          id="phone"
+                          placeholder="Phone"
+                          required
+                        />
+                      </div>
+                      <div class="modal-footer">
+                        <button
+                          type="button"
+                          id="add-student-form"
+                          class="btn btn-secondary"
+                          data-dismiss="modal"
+                        >
+                          Close
+                        </button>
+                        <button
+                          [disabled]="addStudentForm.invalid"
+                          type="submit"
+                          class="btn btn-primary"
+                        >
+                          Save changes
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Update Modal -->
+            <div
+              class="modal fade"
+              id="updateStudentModal"
+              tabindex="-1"
+              role="dialog"
+              aria-labelledby="studentEditModalLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="updateStudentModalLabel">
+                      {{ editStudent?.name }}
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form #editStudentForm="ngForm">
+                      <div class="form-group">
+                        <input
+                          type="text"
+                          ngModel="{{ editStudent?.name }}"
+                          name="name"
+                          class="form-control"
+                          id="name"
+                          aria-describedby="emailHelp"
+                          placeholder="Name"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="email">Email</label>
+                        <input
+                          type="text"
+                          ngModel="{{ editStudent?.email }}"
+                          name="email"
+                          class="form-control"
+                          id="email"
+                          placeholder="Email"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="text">Phone</label>
+                        <input
+                          type="number"
+                          (input)="limitInputLength($event, 10)"
+                          ngModel="{{ editStudent?.phone }}"
+                          name="phone"
+                          class="form-control"
+                          id="phone"
+                          placeholder="Phone"
+                        />
+                      </div>
+                      <div class="modal-footer">
+                        <button
+                          type="button"
+                          id=""
+                          data-dismiss="modal"
+                          class="btn btn-secondary"
+                        >
+                          Close
+                        </button>
+                        <button
+                          (click)="
+                            onUpdateStudent(
+                              editStudent.id,
+                              editStudentForm.value
+                            )
+                          "
+                          data-dismiss="modal"
+                          class="btn btn-primary"
+                        >
+                          Save changes
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Delete Modal -->
+            <div
+              class="modal fade"
+              id="deleteStudentModal"
+              tabindex="-1"
+              role="dialog"
+              aria-labelledby="deleteModelLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModelLabel">
+                      Delete Student
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>
+                      Are you sure you want to delete {{ deleteStudent?.name }}?
+                    </p>
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-dismiss="modal"
+                      >
+                        No
+                      </button>
+                      <button
+                        (click)="onDeleteStudent(deleteStudent.id)"
+                        class="btn btn-danger"
+                        data-dismiss="modal"
+                      >
+                        Yes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Student Subject Modal -->
+          <div
+            class="modal fade"
+            id="addStudentSubjectModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="addStudentSubjectModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="addStudentSubjectModalLabel">
+                    Add Subject
+                  </h5>
+                  <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <form
+                    #addStudentSubjectForm="ngForm"
+                    (ngSubmit)="onAddStudentSubject(addStudentSubjectForm)"
+                  >
+                    <label for="text">Subjects</label>
+                    <select
+                      class="form-control"
+                      id="dropdownSubjects"
+                      name="selectedSubjectId"
+                      [(ngModel)]="selectedSubjectId"
+                    >
+                      <option
+                        *ngFor="
+                          let subject of getUnregisteredSubjects(
+                            selectedStudentId
+                          )
+                        "
+                        [value]="subject.id"
+                      >
+                        {{ subject.name }}
+                      </option>
+                    </select>
+                    <input
+                      type="hidden"
+                      name="studentId"
+                      [value]="selectedStudentId"
+                    />
+
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        id="add-student-subject-form"
+                        class="btn btn-secondary"
+                        data-dismiss="modal"
+                      >
+                        Close
+                      </button>
+                      <button type="submit" class="btn btn-primary">
+                        Save changes
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notification for no students -->
+          <div
+            *ngIf="students?.length == 0"
+            class="col-lg-12 col-md-12 col-xl-12"
+          >
+            <div class="alert alert-info" role="alert">
+              <h4 class="alert-heading">NO STUDENTS!</h4>
+              <p>No students were found.</p>
+            </div>
+          </div>
+        </div>
+        <!-- ############### Tab 2 #################-->
+        <div class="tab-pane fade" id="tab2">
+          <nav class="navbar navbar-expand-lg navbar-dark bg-white">
+            <a class="navbar-brand" style="color: black">Subjects Manager</a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-toggle="collapse"
+              data-target="#navbarColor02"
+              aria-controls="navbarColor02"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarColor02">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                  <a
+                    class="nav-link"
+                    (click)="onOpenSubjectModal(null, 'add')"
+                    style="color: black"
+                    >Add Subject <span class="sr-only">(current)</span></a
+                  >
+                </li>
+              </ul>
+              <form class="form-inline my-2 my-lg-0">
+                <input
+                  type="search"
+                  (ngModelChange)="searchSubjects(key.value)"
+                  (input)="searchSubjects($event)"
+                  #key="ngModel"
+                  ngModel
+                  name="key"
+                  id="searchSubjects"
+                  class="form-control mr-sm-2"
+                  placeholder="Search subjects..."
+                  required
+                />
+              </form>
+            </div>
+          </nav>
+          <div class="container" id="main-container">
+            <div class="row">
+              <div
+                *ngFor="let subject of getPaginatedSubjects()"
+                class="col-md-6 col-xl-4"
+              >
+                <div class="card m-b-30">
+                  <div class="card-body row">
+                    <div class="col-12 card-title align-self-center mb-0">
+                      <h5>{{ subject?.name }}</h5>
+                    </div>
+                  </div>
+                  <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                      <i class="fa fa-envelope float-right"></i>ID:
+                      {{ subject?.id }}
+                    </li>
+                  </ul>
+                  <div class="card-body">
+                    <div class="float-right btn-group btn-group-sm">
+                      <a
+                        (click)="onOpenSubjectModal(subject, 'edit')"
+                        class="btn btn-primary tooltips"
+                        data-placement="top"
+                        data-original-title="Edit"
+                        ><i class="fa fa-pencil"></i>
+                      </a>
+                      <a
+                        (click)="onOpenSubjectModal(subject, 'delete')"
+                        class="btn btn-secondary tooltips"
+                        data-placement="top"
+                        data-original-title="Delete"
+                        ><i class="fa fa-times"></i
+                      ></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <ul class="pagination">
+                <li
+                  class="page-item"
+                  *ngFor="let page of getPaginationSubjectsArray()"
+                >
+                  <a class="page-link" (click)="onPageChangeSubject(page)">{{
+                    page
+                  }}</a>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Add Modal -->
+            <div
+              class="modal fade"
+              id="addSubjectModal"
+              tabindex="-1"
+              role="dialog"
+              aria-labelledby="addSubjectModalLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="addSubjectModalLabel">
+                      Add Subject
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form
+                      #addSubjectForm="ngForm"
+                      (ngSubmit)="onAddSubject(addSubjectForm)"
+                    >
+                      <div class="form-group">
+                        <label for="name">Name</label>
+                        <input
+                          type="text"
+                          ngModel
+                          name="name"
+                          class="form-control"
+                          id="name"
+                          placeholder="Name"
+                          required
+                        />
+                      </div>
+                      <div class="modal-footer">
+                        <button
+                          type="button"
+                          id="add-subject-form"
+                          class="btn btn-secondary"
+                          data-dismiss="modal"
+                        >
+                          Close
+                        </button>
+                        <button
+                          [disabled]="addSubjectForm.invalid"
+                          type="submit"
+                          class="btn btn-primary"
+                        >
+                          Save changes
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Update Modal -->
+            <div
+              class="modal fade"
+              id="updateSubjectModal"
+              tabindex="-1"
+              role="dialog"
+              aria-labelledby="subjectEditModalLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="updateSubjectModalLabel">
+                      {{ editSubject?.name }}
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form #editSubjectForm="ngForm">
+                      <div class="form-group">
+                        <label for="text">Name</label>
+                        <input
+                          type="text"
+                          ngModel="{{ editSubject?.name }}"
+                          name="name"
+                          class="form-control"
+                          id="name"
+                          aria-describedby="emailHelp"
+                          placeholder="Name"
+                        />
+                      </div>
+                      <div class="modal-footer">
+                        <button
+                          type="button"
+                          id=""
+                          data-dismiss="modal"
+                          class="btn btn-secondary"
+                        >
+                          Close
+                        </button>
+                        <button
+                          (click)="
+                            onUpdateSubject(
+                              editSubject.id,
+                              editSubjectForm.value
+                            )
+                          "
+                          data-dismiss="modal"
+                          class="btn btn-primary"
+                        >
+                          Save changes
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Delete Modal -->
+            <div
+              class="modal fade"
+              id="deleteSubjectModal"
+              tabindex="-1"
+              role="dialog"
+              aria-labelledby="deleteModelLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModelLabel">
+                      Delete Subject
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>
+                      Are you sure you want to delete {{ deleteSubject?.name }}?
+                    </p>
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-dismiss="modal"
+                      >
+                        No
+                      </button>
+                      <button
+                        (click)="onDeleteSubject(deleteSubject.id)"
+                        class="btn btn-danger"
+                        data-dismiss="modal"
+                      >
+                        Yes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notification for no subjects -->
+          <div
+            *ngIf="subjects?.length == 0"
+            class="col-lg-12 col-md-12 col-xl-12"
+          >
+            <div class="alert alert-info" role="alert">
+              <h4 class="alert-heading">NO SUBJECTS!</h4>
+              <p>No subjects were found.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery & Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <!-- Change Tabs -->
+    <script>
+      $(document).ready(function () {
+        $("#myTabs a").on("click", function (e) {
+          e.preventDefault();
+          $(this).tab("show");
+        });
+      });
+    </script>
+  </body>
+</html>
