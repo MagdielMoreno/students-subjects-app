@@ -30,7 +30,12 @@ public class SubjectService {
     public void deleteSubject(Long id){
         if(!subjectRepo.existsById(id))
             throw new IllegalStateException("Subject doesn't exists");
-        subjectRepo.deleteById(id);
+
+        try {
+            subjectRepo.deleteById(id);
+        } catch (Exception e) {
+            throw new IllegalStateException("Subject added to a student cannot be removed");
+        }
     }
 
     public Subject findSubject(Long id){

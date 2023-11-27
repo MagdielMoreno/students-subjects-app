@@ -13,7 +13,9 @@ import { StudentsSubjectsService } from './students-subjects.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
+
 export class AppComponent implements OnInit{
+
   public students!: Student[];
   public editStudent!: Student;
   public deleteStudent!: Student;
@@ -36,7 +38,7 @@ export class AppComponent implements OnInit{
   constructor(
     private studentService: StudentService, 
     private subjectService: SubjectService, 
-    private studentsSubjectsService: StudentsSubjectsService,
+    private studentsSubjectsService: StudentsSubjectsService
   ){}
 
   ngOnInit(): void {
@@ -217,7 +219,7 @@ export class AppComponent implements OnInit{
         this.getSubjects();
       },
       (error: HttpErrorResponse) => {
-        alert(error.message);
+        alert("Subject added to a student cannot be removed");
       }
     );
   }
